@@ -24,9 +24,6 @@ const P5Canvas = () => {
     // Effect layer state
     let circles: Array<{ x: number; y: number; size: number; speed: number }> = [];
 
-    // Symbol shake offset
-    let shakeOffset = { x: 0, y: 0 };
-
     const sketch = (p: p5) => {
       p.setup = () => {
         p.createCanvas(p.windowWidth, p.windowHeight);
@@ -92,11 +89,11 @@ const P5Canvas = () => {
         symbolGraphics.clear();
 
         // Update shake
-        shakeOffset.x = p.random(-3, 3);
-        shakeOffset.y = p.random(-3, 3);
+        const shakeX = p.random(-3, 3);
+        const shakeY = p.random(-3, 3);
 
-        const centerX = p.width / 2 + shakeOffset.x;
-        const centerY = p.height / 2 + shakeOffset.y;
+        const centerX = p.width / 2 + shakeX;
+        const centerY = p.height / 2 + shakeY;
 
         symbolGraphics.push();
         symbolGraphics.translate(centerX, centerY);

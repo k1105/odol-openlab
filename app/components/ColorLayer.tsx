@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 
 const ColorLayer = () => {
-  const [colorState, setColorState] = useState(3); // Initial: black
   const [currentColor, setCurrentColor] = useState({ r: 0, g: 0, b: 0 });
   const [targetColor, setTargetColor] = useState({ r: 0, g: 0, b: 0 });
 
@@ -13,7 +12,6 @@ const ColorLayer = () => {
       const key = e.key;
       if (key === '0' || key === '1' || key === '2' || key === '3') {
         const value = parseInt(key);
-        setColorState(value);
 
         switch (value) {
           case 0:
