@@ -21,8 +21,6 @@ const TextEffect = ({ effectLayer }: TextEffectProps) => {
   if (!isVisible) return null;
 
   const lines = ['OPEN', 'LAB', 'TOKYO'];
-  const allChars = lines.join('');
-  const totalChars = allChars.length;
 
   return (
     <div className={styles.container}>
