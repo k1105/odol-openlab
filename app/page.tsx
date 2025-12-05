@@ -6,6 +6,7 @@ import Image from "next/image";
 import {AudioReceiver} from "./components/AudioReceiver";
 import TextEffect from "./components/TextEffect";
 import ScrollingText from "./components/ScrollingText";
+import DebugConsole from "./components/DebugConsole";
 
 const P5Canvas = dynamic(() => import("./components/P5Canvas"), {ssr: false});
 const ColorLayer = dynamic(() => import("./components/ColorLayer"), {
@@ -70,13 +71,19 @@ export default function Home() {
   return (
     <>
       <ScrollingText />
+      <DebugConsole
+        audioLevel={audioLevel}
+        effectLayer={effectLayer}
+        colorState={colorState}
+        symbolLayer={symbolLayer}
+      />
       <AudioReceiver
         onEffectDetected={handleEffectDetected}
         availableEffects={10}
         permissionsGranted={permissionsGranted}
         onAudioLevelChange={setAudioLevel}
       />
-      <ColorLayer colorState={colorState} />
+      <ColorLayer colorState={colorState} isFlickering={effectLayer === 5} />
       <TextEffect effectLayer={effectLayer} />
       <P5Canvas symbolLayer={symbolLayer} audioLevel={audioLevel} />
       <div

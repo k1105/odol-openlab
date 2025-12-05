@@ -4,33 +4,61 @@ import { useEffect, useState } from 'react';
 
 interface ColorLayerProps {
   colorState: number; // 0, 1, 2, 3
+  isFlickering?: boolean; // フリッキング（点滅）モード
 }
 
-const ColorLayer = ({ colorState }: ColorLayerProps) => {
+const ColorLayer = ({ colorState, isFlickering = false }: ColorLayerProps) => {
   const [currentColor, setCurrentColor] = useState({ r: 0, g: 0, b: 0 });
   const [targetColor, setTargetColor] = useState({ r: 0, g: 0, b: 0 });
+  const [baseColor, setBaseColor] = useState({ r: 0, g: 0, b: 0 }); // フリッキング用の基準色
 
   // Update color based on props
   useEffect(() => {
+    let color;
     switch (colorState) {
       case 0:
-        setTargetColor({ r: 255, g: 100, b: 100 }); // Red
+        color = { r: 255, g: 100, b: 100 }; // Red
         break;
       case 1:
-        setTargetColor({ r: 100, g: 255, b: 100 }); // Green
+        color = { r: 100, g: 255, b: 100 }; // Green
         break;
       case 2:
-        setTargetColor({ r: 100, g: 100, b: 255 }); // Blue
+        color = { r: 100, g: 100, b: 255 }; // Blue
         break;
       case 3:
       default:
-        setTargetColor({ r: 0, g: 0, b: 0 }); // Black
+        color = { r: 0, g: 0, b: 0 }; // Black
         break;
     }
+    setTargetColor(color);
+    setBaseColor(color); // 基準色も更新
   }, [colorState]);
 
-  // Easing animation
+  // Flickering effect
   useEffect(() => {
+    if (!isFlickering) return;
+
+    let interval: NodeJS.Timeout;
+    let isBlack = false;
+
+    interval = setInterval(() => {
+      isBlack = !isBlack;
+      if (isBlack) {
+        setCurrentColor({ r: 0, g: 0, b: 0 }); // 黒
+      } else {
+        setCurrentColor(baseColor); // 基準色
+      }
+    }, 100); // 100msごとに切り替え（1秒間に10回点滅）
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isFlickering, baseColor]);
+
+  // Easing animation (フリッキング中は無効)
+  useEffect(() => {
+    if (isFlickering) return; // フリッキング中は通常のアニメーションを無効化
+
     let animationFrame: number;
 
     const animate = () => {
@@ -61,7 +89,7 @@ const ColorLayer = ({ colorState }: ColorLayerProps) => {
         cancelAnimationFrame(animationFrame);
       }
     };
-  }, [targetColor]);
+  }, [targetColor, isFlickering]);
 
   // Apply color to body
   useEffect(() => {
