@@ -38,10 +38,9 @@ const ColorLayer = ({ colorState, isFlickering = false }: ColorLayerProps) => {
   useEffect(() => {
     if (!isFlickering) return;
 
-    let interval: NodeJS.Timeout;
     let isBlack = false;
 
-    interval = setInterval(() => {
+    const interval = setInterval(() => {
       isBlack = !isBlack;
       if (isBlack) {
         setCurrentColor({ r: 0, g: 0, b: 0 }); // 黒
