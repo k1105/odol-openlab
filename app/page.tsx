@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import {AudioReceiver} from "./components/AudioReceiver";
 import TextEffect from "./components/TextEffect";
+import ScrollingText from "./components/ScrollingText";
 
 const P5Canvas = dynamic(() => import("./components/P5Canvas"), {ssr: false});
 const ColorLayer = dynamic(() => import("./components/ColorLayer"), {
@@ -16,6 +17,7 @@ export default function Home() {
   const [effectLayer, setEffectLayer] = useState(6); // 4, 5, 6
   const [symbolLayer, setSymbolLayer] = useState(9); // 7, 8, 9
   const [permissionsGranted, setPermissionsGranted] = useState(false);
+  const [audioLevel, setAudioLevel] = useState(0); // マイクの音量レベル
 
   // マイク権限をリクエスト
   useEffect(() => {
@@ -67,14 +69,16 @@ export default function Home() {
 
   return (
     <>
+      <ScrollingText />
       <AudioReceiver
         onEffectDetected={handleEffectDetected}
         availableEffects={10}
         permissionsGranted={permissionsGranted}
+        onAudioLevelChange={setAudioLevel}
       />
       <ColorLayer colorState={colorState} />
       <TextEffect effectLayer={effectLayer} />
-      <P5Canvas symbolLayer={symbolLayer} />
+      <P5Canvas symbolLayer={symbolLayer} audioLevel={audioLevel} />
       <div
         style={{
           position: "fixed",
