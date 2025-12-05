@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { AudioReceiver } from './components/AudioReceiver';
+import TextEffect from './components/TextEffect';
 
 const P5Canvas = dynamic(() => import('./components/P5Canvas'), { ssr: false });
 const ColorLayer = dynamic(() => import('./components/ColorLayer'), { ssr: false });
@@ -70,7 +71,8 @@ export default function Home() {
         permissionsGranted={permissionsGranted}
       />
       <ColorLayer colorState={colorState} />
-      <P5Canvas effectLayer={effectLayer} symbolLayer={symbolLayer} />
+      <TextEffect effectLayer={effectLayer} />
+      <P5Canvas symbolLayer={symbolLayer} />
       <div
         style={{
           position: 'fixed',
