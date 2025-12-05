@@ -1,19 +1,26 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import p5 from 'p5';
+import {useEffect, useRef} from "react";
+import p5 from "p5";
 
-interface LayerState {
+interface P5CanvasProps {
   effectLayer: number; // 4, 5, 6 (6 = hidden)
   symbolLayer: number; // 7, 8, 9 (9 = hidden)
 }
 
-const P5Canvas = () => {
+const P5Canvas = ({effectLayer, symbolLayer}: P5CanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [layerState, setLayerState] = useState<LayerState>({
-    effectLayer: 6,
-    symbolLayer: 9,
-  });
+  const effectLayerRef = useRef(effectLayer);
+  const symbolLayerRef = useRef(symbolLayer);
+
+  // Update refs when props change
+  useEffect(() => {
+    effectLayerRef.current = effectLayer;
+  }, [effectLayer]);
+
+  useEffect(() => {
+    symbolLayerRef.current = symbolLayer;
+  }, [symbolLayer]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -22,7 +29,8 @@ const P5Canvas = () => {
     let symbolGraphics: p5.Graphics;
 
     // Effect layer state
-    let circles: Array<{ x: number; y: number; size: number; speed: number }> = [];
+    let circles: Array<{x: number; y: number; size: number; speed: number}> =
+      [];
 
     const sketch = (p: p5) => {
       p.setup = () => {
@@ -39,14 +47,16 @@ const P5Canvas = () => {
       p.draw = () => {
         p.clear();
 
-        // Effect Layer
-        if (layerState.effectLayer < 6) {
+        // Effect Layer - use ref to get current value
+        const currentEffectLayer = effectLayerRef.current;
+        if (currentEffectLayer < 6) {
           drawEffectLayer();
           p.image(effectGraphics, 0, 0);
         }
 
-        // Symbol Layer
-        if (layerState.symbolLayer < 9) {
+        // Symbol Layer - use ref to get current value
+        const currentSymbolLayer = symbolLayerRef.current;
+        if (currentSymbolLayer === 7 || currentSymbolLayer === 8) {
           drawSymbolLayer();
           p.image(symbolGraphics, 0, 0);
         }
@@ -55,9 +65,11 @@ const P5Canvas = () => {
       const drawEffectLayer = () => {
         effectGraphics.clear();
 
-        // Update and draw circles
-        const numCircles = layerState.effectLayer === 4 ? 5 : layerState.effectLayer === 5 ? 15 : 0;
-        const tempo = layerState.effectLayer === 4 ? 1 : 2.5;
+        // Update and draw circles - use ref to get current value
+        const currentEffectLayer = effectLayerRef.current;
+        const numCircles =
+          currentEffectLayer === 4 ? 5 : currentEffectLayer === 5 ? 15 : 0;
+        const tempo = currentEffectLayer === 4 ? 1 : 2.5;
 
         // Add or remove circles based on current state
         while (circles.length < numCircles) {
@@ -98,13 +110,14 @@ const P5Canvas = () => {
         symbolGraphics.push();
         symbolGraphics.translate(centerX, centerY);
 
-        if (layerState.symbolLayer === 7) {
+        const currentSymbolLayer = symbolLayerRef.current;
+        if (currentSymbolLayer === 7) {
           // Circle
           symbolGraphics.noFill();
           symbolGraphics.stroke(255);
           symbolGraphics.strokeWeight(3);
           symbolGraphics.circle(0, 0, 200);
-        } else if (layerState.symbolLayer === 8) {
+        } else if (currentSymbolLayer === 8) {
           // Rectangle
           symbolGraphics.noFill();
           symbolGraphics.stroke(255);
@@ -120,18 +133,6 @@ const P5Canvas = () => {
         circles = [];
       };
 
-      p.keyPressed = () => {
-        const key = p.key;
-
-        if (key === '4' || key === '5' || key === '6') {
-          const value = parseInt(key);
-          setLayerState((prev) => ({ ...prev, effectLayer: value }));
-        } else if (key === '7' || key === '8' || key === '9') {
-          const value = parseInt(key);
-          setLayerState((prev) => ({ ...prev, symbolLayer: value }));
-        }
-      };
-
       p.windowResized = () => {
         p.resizeCanvas(p.windowWidth, p.windowHeight);
         effectGraphics.resizeCanvas(p.windowWidth, p.windowHeight);
@@ -144,17 +145,17 @@ const P5Canvas = () => {
     return () => {
       p5Instance.remove();
     };
-  }, [layerState]);
+  }, []); // Empty deps - p5 instance should only be created once
 
   return (
     <div
       ref={canvasRef}
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
         zIndex: 0,
       }}
     />

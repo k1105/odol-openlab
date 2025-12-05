@@ -2,38 +2,32 @@
 
 import { useEffect, useState } from 'react';
 
-const ColorLayer = () => {
+interface ColorLayerProps {
+  colorState: number; // 0, 1, 2, 3
+}
+
+const ColorLayer = ({ colorState }: ColorLayerProps) => {
   const [currentColor, setCurrentColor] = useState({ r: 0, g: 0, b: 0 });
   const [targetColor, setTargetColor] = useState({ r: 0, g: 0, b: 0 });
 
-  // Handle keyboard input
+  // Update color based on props
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      const key = e.key;
-      if (key === '0' || key === '1' || key === '2' || key === '3') {
-        const value = parseInt(key);
-
-        switch (value) {
-          case 0:
-            setTargetColor({ r: 255, g: 100, b: 100 }); // Red
-            break;
-          case 1:
-            setTargetColor({ r: 100, g: 255, b: 100 }); // Green
-            break;
-          case 2:
-            setTargetColor({ r: 100, g: 100, b: 255 }); // Blue
-            break;
-          case 3:
-          default:
-            setTargetColor({ r: 0, g: 0, b: 0 }); // Black
-            break;
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
+    switch (colorState) {
+      case 0:
+        setTargetColor({ r: 255, g: 100, b: 100 }); // Red
+        break;
+      case 1:
+        setTargetColor({ r: 100, g: 255, b: 100 }); // Green
+        break;
+      case 2:
+        setTargetColor({ r: 100, g: 100, b: 255 }); // Blue
+        break;
+      case 3:
+      default:
+        setTargetColor({ r: 0, g: 0, b: 0 }); // Black
+        break;
+    }
+  }, [colorState]);
 
   // Easing animation
   useEffect(() => {
