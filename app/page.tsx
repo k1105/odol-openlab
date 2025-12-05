@@ -1,13 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import { AudioReceiver } from './components/AudioReceiver';
-import TextEffect from './components/TextEffect';
+import {useState, useEffect} from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import {AudioReceiver} from "./components/AudioReceiver";
+import TextEffect from "./components/TextEffect";
 
-const P5Canvas = dynamic(() => import('./components/P5Canvas'), { ssr: false });
-const ColorLayer = dynamic(() => import('./components/ColorLayer'), { ssr: false });
+const P5Canvas = dynamic(() => import("./components/P5Canvas"), {ssr: false});
+const ColorLayer = dynamic(() => import("./components/ColorLayer"), {
+  ssr: false,
+});
 
 export default function Home() {
   const [colorState, setColorState] = useState(3); // 0, 1, 2, 3
@@ -19,10 +21,10 @@ export default function Home() {
   useEffect(() => {
     const requestPermissions = async () => {
       try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
+        await navigator.mediaDevices.getUserMedia({audio: true});
         setPermissionsGranted(true);
       } catch (error) {
-        console.error('マイク権限エラー:', error);
+        console.error("マイク権限エラー:", error);
       }
     };
     requestPermissions();
@@ -53,14 +55,14 @@ export default function Home() {
     const handleKeyPress = (e: KeyboardEvent) => {
       const key = e.key;
 
-      if (key >= '0' && key <= '9') {
+      if (key >= "0" && key <= "9") {
         const value = parseInt(key);
         handleEffectDetected(value);
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, []);
 
   return (
@@ -75,10 +77,10 @@ export default function Home() {
       <P5Canvas symbolLayer={symbolLayer} />
       <div
         style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
           zIndex: 1000,
         }}
       >
@@ -87,6 +89,25 @@ export default function Home() {
           alt="QR Code"
           width={200}
           height={200}
+          priority
+        />
+      </div>
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "30vw",
+          zIndex: 1000,
+        }}
+      >
+        <Image
+          src="/logo.svg"
+          alt="Logo"
+          width={1000}
+          height={100}
+          style={{width: "100%", height: "auto"}}
           priority
         />
       </div>
