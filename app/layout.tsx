@@ -26,6 +26,27 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {children}
+        <div
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1000,
+            width: '200px',
+            height: '200px',
+            backgroundColor: 'white',
+            border: '2px solid #000',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '14px',
+            textAlign: 'center',
+            padding: '20px',
+          }}
+        >
+          QR Code Placeholder
+        </div>
       </body>
     </html>
   );
