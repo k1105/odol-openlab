@@ -118,7 +118,7 @@ export default function Home() {
         permissionsGranted={permissionsGranted}
         onAudioLevelChange={setAudioLevel}
       />
-      <ColorLayer colorState={colorState} isFlickering={effectLayer === 5} />
+      <ColorLayer colorState={colorState} isFlickering={false} />
       <TextEffect effectLayer={effectLayer} />
       <P5Canvas symbolLayer={symbolLayer} audioLevel={audioLevel} />
       <div className={styles.qrCodeContainer}>
