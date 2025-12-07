@@ -27,7 +27,7 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
 
     let symbolGraphics: p5.Graphics;
     const trailGraphics: p5.Graphics[] = []; // 残像用のグラフィックス配列
-    let noiseOffset = 0; // ノイズのオフセット
+    let frameCount = 0; // フレームカウント
 
     const sketch = (p: p5) => {
       p.setup = () => {
@@ -82,32 +82,27 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
         const currentAudioLevel = audioLevelRef.current;
 
         // 音量に応じた基本サイズ（7と8で強度が異なる）
-        const baseSize = currentSymbolLayer === 7 ? 150 : 250;
-        const audioMultiplier = currentSymbolLayer === 7 ? 200 : 400;
-        const radius = baseSize + currentAudioLevel * audioMultiplier;
+        // レイヤー7: 画面幅の70%、レイヤー8: 画面幅の90%
+        const baseSizeRatio = currentSymbolLayer === 7 ? 0.8 : 1.2;
+        const baseSize = p.width * baseSizeRatio;
+        const audioMultiplier = currentSymbolLayer === 7 ? 100 : 200;
+        const size = baseSize + currentAudioLevel * audioMultiplier;
 
-        // ノイズの強度（8の方が強い）
-        const noiseStrength = currentSymbolLayer === 7 ? 15 : 30;
-
-        // 歪んだ円を描画
+        // 新しいシェイプを描画
         symbolGraphics.noFill();
         symbolGraphics.stroke(255);
-        symbolGraphics.strokeWeight(3);
+        symbolGraphics.strokeJoin(p.ROUND);
+        symbolGraphics.strokeWeight(10);
         symbolGraphics.beginShape();
 
-        const numPoints = 100; // 円を構成する点の数
-        for (let i = 0; i <= numPoints; i++) {
+        const numPoints = 25;
+        for (let i = 0; i < numPoints; i++) {
           const angle = (i / numPoints) * p.TWO_PI;
+          const noiseValue = p.noise(i + frameCount / 50);
+          const amplitude = p.sin(noiseValue);
 
-          // ノイズを使って半径を変化させる
-          const noiseValue = p.noise(
-            p.cos(angle) * 0.5 + noiseOffset,
-            p.sin(angle) * 0.5 + noiseOffset
-          );
-          const distortedRadius = radius + (noiseValue - 0.5) * noiseStrength * (1 + currentAudioLevel);
-
-          const x = p.cos(angle) * distortedRadius;
-          const y = p.sin(angle) * distortedRadius;
+          const x = size * p.cos(angle) * amplitude;
+          const y = size * p.sin(angle) * amplitude;
 
           symbolGraphics.vertex(x, y);
         }
@@ -115,8 +110,8 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
         symbolGraphics.endShape(p.CLOSE);
         symbolGraphics.pop();
 
-        // ノイズオフセットを更新（アニメーションのため）
-        noiseOffset += 0.02;
+        // フレームカウントを更新（アニメーションのため）
+        frameCount++;
       };
 
       p.windowResized = () => {

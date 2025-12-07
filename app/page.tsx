@@ -5,8 +5,6 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import {AudioReceiver} from "./components/AudioReceiver";
 import TextEffect from "./components/TextEffect";
-import ScrollingText from "./components/ScrollingText";
-import DebugConsole from "./components/DebugConsole";
 
 const P5Canvas = dynamic(() => import("./components/P5Canvas"), {ssr: false});
 const ColorLayer = dynamic(() => import("./components/ColorLayer"), {
@@ -70,13 +68,6 @@ export default function Home() {
 
   return (
     <>
-      <ScrollingText />
-      <DebugConsole
-        audioLevel={audioLevel}
-        effectLayer={effectLayer}
-        colorState={colorState}
-        symbolLayer={symbolLayer}
-      />
       <AudioReceiver
         onEffectDetected={handleEffectDetected}
         availableEffects={10}
@@ -100,25 +91,6 @@ export default function Home() {
           alt="QR Code"
           width={200}
           height={200}
-          priority
-        />
-      </div>
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "30vw",
-          zIndex: 1000,
-        }}
-      >
-        <Image
-          src="/logo.svg"
-          alt="Logo"
-          width={1000}
-          height={100}
-          style={{width: "100%", height: "auto"}}
           priority
         />
       </div>
