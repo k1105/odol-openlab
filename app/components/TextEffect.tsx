@@ -11,15 +11,53 @@ interface TextEffectProps {
 const TextEffect = ({effectLayer}: TextEffectProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const p5InstanceRef = useRef<p5 | null>(null);
 
   useEffect(() => {
-    if (effectLayer === 4) {
+    if (effectLayer === 4 || effectLayer === 5) {
       setIsVisible(true);
     } else {
       setIsVisible(false);
     }
   }, [effectLayer]);
+
+  // font-weightの単振動アニメーション
+  useEffect(() => {
+    if (!isVisible || !containerRef.current) return;
+
+    let startTime: number | null = null;
+    const duration = 1000; // 1秒周期
+    const minWeight = 200;
+    const maxWeight = 900;
+    const amplitude = (maxWeight - minWeight) / 2; // 350
+    const center = (minWeight + maxWeight) / 2; // 550
+
+    const animate = (timestamp: number) => {
+      if (startTime === null) {
+        startTime = timestamp;
+      }
+
+      const elapsed = (timestamp - startTime) % duration;
+      const progress = elapsed / duration;
+
+      // sin波で計算: -1から1の範囲を550±350に変換
+      const weight = center + amplitude * Math.sin(progress * Math.PI * 2);
+
+      // container内のすべての.char要素にfont-weightを適用
+      const charElements = containerRef.current?.querySelectorAll<HTMLElement>(
+        `.${styles.char}`
+      );
+      charElements?.forEach((element) => {
+        element.style.fontVariationSettings = `"wght" ${Math.round(weight)}`;
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    const animationId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationId);
+  }, [isVisible]);
 
   // effectLayer === 6の場合のp5.jsスケッチ
   useEffect(() => {
@@ -195,16 +233,44 @@ const TextEffect = ({effectLayer}: TextEffectProps) => {
 
   if (!isVisible) return null;
 
-  const lines = ["OPEN", "LAB", "TOKYO"];
+  // effectLayerに応じてテキストを変更
+  let lines: string[];
+  if (effectLayer === 4) {
+    lines = ["HTK HTK", "HTK HTK", "HTK HTK", "HTK HTK", "HTK HTK"];
+  } else if (effectLayer === 5) {
+    lines = [
+      "DJ HIRONORI",
+      "DJ HIRONORI",
+      "DJ HIRONORI",
+      "DJ HIRONORI",
+      "DJ HIRONORI",
+    ];
+  } else {
+    lines = ["OPEN", "LAB", "TOKYO"];
+  }
+
+  // effectLayerに応じてフォントサイズを調整
+  // DJ HIRONORIが長いので、effectLayer === 5の時は小さく
+  const fontSize = effectLayer === 5 ? "12vw" : "25vw";
+  const mobileFontSize = effectLayer === 5 ? "18vw" : "35vw";
 
   return (
-    <div className={styles.container}>
+    <div ref={containerRef} className={styles.container}>
       {lines.map((line, lineIndex) => {
         // 前の行までの文字数を計算
         const charsBeforeLine = lines.slice(0, lineIndex).join("").length;
 
         return (
-          <div key={lineIndex} className={styles.line}>
+          <div
+            key={lineIndex}
+            className={styles.line}
+            style={
+              {
+                fontSize: fontSize,
+                ["--mobile-font-size" as string]: mobileFontSize,
+              } as React.CSSProperties
+            }
+          >
             {line.split("").map((char, charIndex) => {
               const globalCharIndex = charsBeforeLine + charIndex;
               const animationDelay = globalCharIndex * 0.1;
