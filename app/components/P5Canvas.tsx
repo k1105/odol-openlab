@@ -26,8 +26,9 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
     if (!canvasRef.current) return;
 
     let symbolGraphics: p5.Graphics;
-    const trailGraphics: p5.Graphics[] = []; // 残像用のグラフィックス配列
+    const trailGraphics: p5.Graphics[] = []; // 残像用のグラフィックス配列（レイヤー9用）
     let frameCount = 0; // フレームカウント
+    const circlePositions: number[] = []; // レイヤー8用: 過去20フレーム分の円の位置
 
     const sketch = (p: p5) => {
       p.setup = () => {
@@ -36,40 +37,94 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
         // Create graphics layer
         symbolGraphics = p.createGraphics(p.windowWidth, p.windowHeight);
 
-        // 残像用のグラフィックスを5枚作成
+        // 残像用のグラフィックスを5枚作成（レイヤー9用）
         for (let i = 0; i < 5; i++) {
           trailGraphics.push(p.createGraphics(p.windowWidth, p.windowHeight));
         }
       };
 
       p.draw = () => {
-        p.clear();
-
         // Symbol Layer - use ref to get current value
         const currentSymbolLayer = symbolLayerRef.current;
         if (currentSymbolLayer === 8 || currentSymbolLayer === 9) {
-          drawSymbolLayer();
+          p.clear();
 
-          // 残像を描画（古い順に描画）
-          for (let i = trailGraphics.length - 1; i >= 0; i--) {
-            const alpha = (i + 1) / (trailGraphics.length + 1); // 透明度を計算
-            p.push();
-            p.tint(255, alpha * 255);
-            p.image(trailGraphics[i], 0, 0);
-            p.pop();
+          if (currentSymbolLayer === 8) {
+            drawSymbolLayer8();
+          } else {
+            drawSymbolLayer();
+
+            // レイヤー9: 残像を描画（古い順に描画）
+            for (let i = trailGraphics.length - 1; i >= 0; i--) {
+              const alpha = (i + 1) / (trailGraphics.length + 1); // 透明度を計算
+              p.push();
+              p.tint(255, alpha * 255);
+              p.image(trailGraphics[i], 0, 0);
+              p.pop();
+            }
+
+            // 最新のフレームを描画
+            p.image(symbolGraphics, 0, 0);
+
+            // 残像を更新（配列をシフト）
+            trailGraphics.unshift(trailGraphics.pop()!);
+            trailGraphics[0].clear();
+            trailGraphics[0].image(symbolGraphics, 0, 0);
+          }
+        }
+      };
+
+      const drawSymbolLayer8 = () => {
+        const circleSize = 10;
+        const trailLength = 20; // 20列分の残像
+        const speed = 3; // 速度係数（大きいほど速い）
+
+        // frameCountの増分を速度に応じて調整
+        frameCount += speed;
+
+        // 現在のフレームの円の位置を計算（円のサイズごとの間隔で）
+        const currentTranslateX =
+          ((circleSize * Math.floor(frameCount)) % p.width) + circleSize / 2;
+
+        // 前回記録した位置と現在の位置の差が円のサイズ以上の場合のみ記録（隙間なく）
+        const lastPosition =
+          circlePositions.length > 0 ? circlePositions[0] : -Infinity;
+        const positionDiff = Math.abs(currentTranslateX - lastPosition);
+        // 画面をまたぐ場合も考慮
+        const wrappedDiff = Math.min(
+          positionDiff,
+          Math.abs(currentTranslateX + p.width - lastPosition),
+          Math.abs(currentTranslateX - p.width - lastPosition)
+        );
+
+        if (circlePositions.length === 0 || wrappedDiff >= circleSize) {
+          circlePositions.unshift(currentTranslateX);
+          if (circlePositions.length > trailLength) {
+            circlePositions.pop();
+          }
+        }
+
+        // 過去20フレーム分を不透明度を段階的に下げて描画
+        for (let i = 0; i < circlePositions.length; i++) {
+          const alpha = 255 * (1 - i / trailLength); // 古いものほど透明度を下げる
+          const translateX = circlePositions[i];
+
+          p.push();
+          p.noStroke();
+          p.fill(255, alpha);
+          p.translate(translateX, 0);
+
+          for (let j = 0; j <= p.height / circleSize; j++) {
+            p.circle(0, 0, circleSize);
+            p.translate(0, circleSize);
           }
 
-          // 最新のフレームを描画
-          p.image(symbolGraphics, 0, 0);
-
-          // 残像を更新（配列をシフト）
-          trailGraphics.unshift(trailGraphics.pop()!);
-          trailGraphics[0].clear();
-          trailGraphics[0].image(symbolGraphics, 0, 0);
+          p.pop();
         }
       };
 
       const drawSymbolLayer = () => {
+        // レイヤー9: 既存のエフェクト
         symbolGraphics.clear();
 
         const centerX = p.width / 2;
@@ -78,14 +133,12 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
         symbolGraphics.push();
         symbolGraphics.translate(centerX, centerY);
 
-        const currentSymbolLayer = symbolLayerRef.current;
         const currentAudioLevel = audioLevelRef.current;
 
-        // 音量に応じた基本サイズ（8と9で強度が異なる）
-        // レイヤー8: 画面幅の80%、レイヤー9: 画面幅の120%
-        const baseSizeRatio = currentSymbolLayer === 8 ? 0.8 : 1.2;
+        // 音量に応じた基本サイズ
+        const baseSizeRatio = 1.2;
         const baseSize = p.width * baseSizeRatio;
-        const audioMultiplier = currentSymbolLayer === 8 ? 100 : 200;
+        const audioMultiplier = 200;
         const size = baseSize + currentAudioLevel * audioMultiplier;
 
         // 新しいシェイプを描画
