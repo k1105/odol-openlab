@@ -80,7 +80,7 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
       const drawSymbolLayer8 = () => {
         const circleSize = 30; // 円の直径（半径を倍にした）
         const trailLength = 20; // 20列分の残像
-        const speed = 3; // 速度係数（大きいほど速い）
+        const speed = 1; // 速度係数（大きいほど速い）
 
         // frameCountの増分を速度に応じて調整
         frameCount += speed;
