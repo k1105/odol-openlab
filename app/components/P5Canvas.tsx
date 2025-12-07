@@ -71,11 +71,14 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
             trailGraphics[0].clear();
             trailGraphics[0].image(symbolGraphics, 0, 0);
           }
+        } else {
+          // レイヤー10（非表示）の時はキャンバスをクリア
+          p.clear();
         }
       };
 
       const drawSymbolLayer8 = () => {
-        const circleSize = 20; // 円の直径（半径を倍にした）
+        const circleSize = 30; // 円の直径（半径を倍にした）
         const trailLength = 20; // 20列分の残像
         const speed = 3; // 速度係数（大きいほど速い）
 
