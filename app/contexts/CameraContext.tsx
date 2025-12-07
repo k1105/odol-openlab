@@ -26,9 +26,13 @@ export function CameraProvider({children}: {children: ReactNode}) {
     } else {
       // カメラをオンにする
       try {
+        // スマートフォン版（768px以下）では外カメラを使用
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+        const facingMode = isMobile ? "environment" : "user"; // スマホ: 外カメラ、PC: フロントカメラ
+
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: "user", // フロントカメラ
+            facingMode: facingMode,
           },
         });
         setVideoStream(stream);
