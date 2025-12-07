@@ -4,10 +4,12 @@ import {useState, useEffect} from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import {AudioReceiver} from "./components/AudioReceiver";
-import TextEffect from "./components/TextEffect";
 
 const P5Canvas = dynamic(() => import("./components/P5Canvas"), {ssr: false});
 const ColorLayer = dynamic(() => import("./components/ColorLayer"), {
+  ssr: false,
+});
+const TextEffect = dynamic(() => import("./components/TextEffect"), {
   ssr: false,
 });
 
