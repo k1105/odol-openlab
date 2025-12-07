@@ -1,6 +1,9 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type {Metadata} from "next";
+import {Geist, Geist_Mono} from "next/font/google";
+import {Bitcount_Prop_Single} from "next/font/google";
 import "./globals.css";
+import {CameraProvider} from "./contexts/CameraContext";
+import CameraToggle from "./components/CameraToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -10,6 +13,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const bitcountPropSingle = Bitcount_Prop_Single({
+  variable: "--font-bitcount-prop-single",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -24,8 +33,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
-        {children}
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${bitcountPropSingle.variable}`}
+        suppressHydrationWarning
+      >
+        <CameraProvider>
+          {children}
+          <CameraToggle />
+        </CameraProvider>
       </body>
     </html>
   );

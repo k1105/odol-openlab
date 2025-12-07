@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import {AudioReceiver} from "./components/AudioReceiver";
 import styles from "./page.module.css";
+import CameraLayer from "./components/CameraLayer";
 
 const P5Canvas = dynamic(() => import("./components/P5Canvas"), {ssr: false});
 const ColorLayer = dynamic(() => import("./components/ColorLayer"), {
@@ -76,8 +77,41 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, []);
 
+  // font-weightの単振動アニメーション
+  useEffect(() => {
+    const element = document.getElementById("vertical-title");
+    if (!element) return;
+
+    let startTime: number | null = null;
+    const duration = 1000; // 3秒周期
+    const minWeight = 200;
+    const maxWeight = 900;
+    const amplitude = (maxWeight - minWeight) / 2; // 300
+    const center = (minWeight + maxWeight) / 2; // 500
+
+    const animate = (timestamp: number) => {
+      if (startTime === null) {
+        startTime = timestamp;
+      }
+
+      const elapsed = (timestamp - startTime) % duration;
+      const progress = elapsed / duration;
+
+      // sin波で計算: -1から1の範囲を500±300に変換
+      const weight = center + amplitude * Math.sin(progress * Math.PI * 2);
+
+      element.style.fontVariationSettings = `"wght" ${Math.round(weight)}`;
+
+      requestAnimationFrame(animate);
+    };
+
+    const animationId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationId);
+  }, []);
+
   return (
     <>
+      <CameraLayer />
       <AudioReceiver
         onEffectDetected={handleEffectDetected}
         availableEffects={11}
@@ -95,6 +129,9 @@ export default function Home() {
           height={200}
           priority
         />
+      </div>
+      <div className={styles.verticalTitle} id="vertical-title">
+        Winter Special Remix Night
       </div>
     </>
   );
