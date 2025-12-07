@@ -158,6 +158,16 @@ const TextEffect = ({effectLayer}: TextEffectProps) => {
 
     p5InstanceRef.current = new p5(sketch, canvasRef.current);
 
+    // キャンバス要素の背景を透明にする
+    setTimeout(() => {
+      const canvasElement = canvasRef.current?.querySelector(
+        "canvas"
+      ) as HTMLCanvasElement;
+      if (canvasElement) {
+        canvasElement.style.backgroundColor = "transparent";
+      }
+    }, 0);
+
     return () => {
       if (p5InstanceRef.current) {
         p5InstanceRef.current.remove();
@@ -177,7 +187,7 @@ const TextEffect = ({effectLayer}: TextEffectProps) => {
           width: "100%",
           height: "100%",
           zIndex: 1100,
-          mixBlendMode: "screen", // 背景とブレンドして透過させる
+          // mix-blend-modeを削除して、背景が正しく表示されるようにする
         }}
       />
     );

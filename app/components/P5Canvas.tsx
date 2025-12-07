@@ -4,7 +4,7 @@ import {useEffect, useRef} from "react";
 import p5 from "p5";
 
 interface P5CanvasProps {
-  symbolLayer: number; // 7, 8, 9 (9 = hidden)
+  symbolLayer: number; // 8, 9, 10 (10 = hidden)
   audioLevel: number; // 0.0 - 1.0
 }
 
@@ -47,7 +47,7 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
 
         // Symbol Layer - use ref to get current value
         const currentSymbolLayer = symbolLayerRef.current;
-        if (currentSymbolLayer === 7 || currentSymbolLayer === 8) {
+        if (currentSymbolLayer === 8 || currentSymbolLayer === 9) {
           drawSymbolLayer();
 
           // 残像を描画（古い順に描画）
@@ -81,11 +81,11 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
         const currentSymbolLayer = symbolLayerRef.current;
         const currentAudioLevel = audioLevelRef.current;
 
-        // 音量に応じた基本サイズ（7と8で強度が異なる）
-        // レイヤー7: 画面幅の70%、レイヤー8: 画面幅の90%
-        const baseSizeRatio = currentSymbolLayer === 7 ? 0.8 : 1.2;
+        // 音量に応じた基本サイズ（8と9で強度が異なる）
+        // レイヤー8: 画面幅の80%、レイヤー9: 画面幅の120%
+        const baseSizeRatio = currentSymbolLayer === 8 ? 0.8 : 1.2;
         const baseSize = p.width * baseSizeRatio;
-        const audioMultiplier = currentSymbolLayer === 7 ? 100 : 200;
+        const audioMultiplier = currentSymbolLayer === 8 ? 100 : 200;
         const size = baseSize + currentAudioLevel * audioMultiplier;
 
         // 新しいシェイプを描画
