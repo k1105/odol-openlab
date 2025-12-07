@@ -6,6 +6,13 @@
   z-index: 1100;
   pointer-events: none;
   text-align: center;
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+
+.container.hidden {
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
 }
 
 .line {

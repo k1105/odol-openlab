@@ -10,11 +10,13 @@ interface TextEffectProps {
 
 const TextEffect = ({effectLayer}: TextEffectProps) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [lastVisibleLines, setLastVisibleLines] = useState<string[]>([]);
   const canvasRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const p5InstanceRef = useRef<p5 | null>(null);
 
   useEffect(() => {
+    // effectLayer === 4 または 5 の時は表示、それ以外（7, 9など）は非表示
     if (effectLayer === 4 || effectLayer === 5) {
       setIsVisible(true);
     } else {
@@ -214,83 +216,91 @@ const TextEffect = ({effectLayer}: TextEffectProps) => {
     };
   }, [effectLayer]);
 
-  if (effectLayer === 6) {
-    return (
-      <div
-        ref={canvasRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 1100,
-          // mix-blend-modeを削除して、背景が正しく表示されるようにする
-        }}
-      />
-    );
-  }
+  // effectLayerに応じてテキストを変更し、表示されている時は保存
+  useEffect(() => {
+    if (effectLayer === 4) {
+      setLastVisibleLines([
+        "HTK HTK",
+        "HTK HTK",
+        "HTK HTK",
+        "HTK HTK",
+        "HTK HTK",
+      ]);
+    } else if (effectLayer === 5) {
+      setLastVisibleLines([
+        "DJ HIRONORI",
+        "DJ HIRONORI",
+        "DJ HIRONORI",
+        "DJ HIRONORI",
+        "DJ HIRONORI",
+      ]);
+    }
+  }, [effectLayer]);
 
-  if (!isVisible) return null;
-
-  // effectLayerに応じてテキストを変更
-  let lines: string[];
-  if (effectLayer === 4) {
-    lines = ["HTK HTK", "HTK HTK", "HTK HTK", "HTK HTK", "HTK HTK"];
-  } else if (effectLayer === 5) {
-    lines = [
-      "DJ HIRONORI",
-      "DJ HIRONORI",
-      "DJ HIRONORI",
-      "DJ HIRONORI",
-      "DJ HIRONORI",
-    ];
-  } else {
-    lines = ["OPEN", "LAB", "TOKYO"];
-  }
+  // 表示するlinesを決定（最後に表示されていたlinesを使用）
+  const lines =
+    lastVisibleLines.length > 0 ? lastVisibleLines : ["OPEN", "LAB", "TOKYO"];
 
   // effectLayerに応じてフォントサイズを調整
-  // DJ HIRONORIが長いので、effectLayer === 5の時は小さく
-  const fontSize = effectLayer === 5 ? "12vw" : "25vw";
-  const mobileFontSize = effectLayer === 5 ? "18vw" : "35vw";
+  // 最後に表示されていたeffectLayerに基づいて判定
+  const fontSize = lines[0] === "DJ HIRONORI" ? "12vw" : "25vw";
+  const mobileFontSize = lines[0] === "DJ HIRONORI" ? "18vw" : "35vw";
 
   return (
-    <div ref={containerRef} className={styles.container}>
-      {lines.map((line, lineIndex) => {
-        // 前の行までの文字数を計算
-        const charsBeforeLine = lines.slice(0, lineIndex).join("").length;
+    <>
+      {effectLayer === 6 && (
+        <div
+          ref={canvasRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 1100,
+          }}
+        />
+      )}
+      <div
+        ref={containerRef}
+        className={`${styles.container} ${!isVisible ? styles.hidden : ""}`}
+      >
+        {lines.map((line, lineIndex) => {
+          // 前の行までの文字数を計算
+          const charsBeforeLine = lines.slice(0, lineIndex).join("").length;
 
-        return (
-          <div
-            key={lineIndex}
-            className={styles.line}
-            style={
-              {
-                fontSize: fontSize,
-                ["--mobile-font-size" as string]: mobileFontSize,
-              } as React.CSSProperties
-            }
-          >
-            {line.split("").map((char, charIndex) => {
-              const globalCharIndex = charsBeforeLine + charIndex;
-              const animationDelay = globalCharIndex * 0.1;
+          return (
+            <div
+              key={lineIndex}
+              className={styles.line}
+              style={
+                {
+                  fontSize: fontSize,
+                  ["--mobile-font-size" as string]: mobileFontSize,
+                } as React.CSSProperties
+              }
+            >
+              {line.split("").map((char, charIndex) => {
+                const globalCharIndex = charsBeforeLine + charIndex;
+                const animationDelay = globalCharIndex * 0.1;
 
-              return (
-                <span
-                  key={charIndex}
-                  className={styles.char}
-                  style={{
-                    animationDelay: `${animationDelay}s`,
-                  }}
-                >
-                  {char}
-                </span>
-              );
-            })}
-          </div>
-        );
-      })}
-    </div>
+                return (
+                  <span
+                    key={charIndex}
+                    className={styles.char}
+                    style={{
+                      animationDelay: `${animationDelay}s`,
+                    }}
+                  >
+                    {char}
+                  </span>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 };
 
