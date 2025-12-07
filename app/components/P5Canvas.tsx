@@ -78,51 +78,67 @@ const P5Canvas = ({symbolLayer, audioLevel}: P5CanvasProps) => {
       };
 
       const drawSymbolLayer8 = () => {
-        const circleSize = 30; // 円の直径（半径を倍にした）
-        const trailLength = 20; // 20列分の残像
+        const columnsPerScreen = 60; // 1画面に表示する列数
+        const circleSize = p.width / columnsPerScreen; // 画面幅に基づいて円の直径を計算
+        const trailLength = 10; // 20列分の残像
         const speed = 1; // 速度係数（大きいほど速い）
 
         // frameCountの増分を速度に応じて調整
         frameCount += speed;
 
-        // 現在のフレームの円の位置を計算（円のサイズごとの間隔で）
-        const currentTranslateX =
+        // 先頭の円の位置を計算（円のサイズごとの間隔で）
+        const headTranslateX =
           ((circleSize * Math.floor(frameCount)) % p.width) + circleSize / 2;
 
-        // 前回記録した位置と現在の位置の差が円のサイズ以上の場合のみ記録（隙間なく）
-        const lastPosition =
+        // 先頭の位置だけを記録（円の直径ごとに更新）
+        const lastHeadPosition =
           circlePositions.length > 0 ? circlePositions[0] : -Infinity;
-        const positionDiff = Math.abs(currentTranslateX - lastPosition);
+        const positionDiff = Math.abs(headTranslateX - lastHeadPosition);
         // 画面をまたぐ場合も考慮
         const wrappedDiff = Math.min(
           positionDiff,
-          Math.abs(currentTranslateX + p.width - lastPosition),
-          Math.abs(currentTranslateX - p.width - lastPosition)
+          Math.abs(headTranslateX + p.width - lastHeadPosition),
+          Math.abs(headTranslateX - p.width - lastHeadPosition)
         );
 
+        // 円の直径分以上移動した場合のみ先頭位置を更新
         if (circlePositions.length === 0 || wrappedDiff >= circleSize) {
-          circlePositions.unshift(currentTranslateX);
+          circlePositions.unshift(headTranslateX);
           if (circlePositions.length > trailLength) {
             circlePositions.pop();
           }
         }
 
-        // 過去20フレーム分を不透明度を段階的に下げて描画
-        for (let i = 0; i < circlePositions.length; i++) {
-          const alpha = 255 * (1 - i / trailLength); // 古いものほど透明度を下げる
-          const translateX = circlePositions[i];
+        // 先頭位置を基準に、円の直径分ずつ後ろにオフセットして描画
+        // 先頭位置（最新）を取得
+        if (circlePositions.length > 0) {
+          const headPosition = circlePositions[0];
 
-          p.push();
-          p.noStroke();
-          p.fill(255, alpha);
-          p.translate(translateX, 0);
+          // 先頭から順に、円の直径分ずつ後ろに配置
+          for (let i = 0; i < circlePositions.length; i++) {
+            // 先頭からの距離に基づいて透明度を計算（滑らかに徐々に暗く）
+            const normalizedAge = i / trailLength; // 0.0 (最新) から 1.0 (最も古い)
+            const alpha = 255 * (1 - normalizedAge); // 255 (最新) から 0 (最も古い)
 
-          for (let j = 0; j <= p.height / circleSize; j++) {
-            p.circle(0, 0, circleSize);
-            p.translate(0, circleSize);
+            // 先頭位置から円の直径分ずつ後ろにオフセット
+            let translateX = headPosition - circleSize * i;
+            // 画面をまたぐ場合の処理
+            if (translateX < 0) {
+              translateX += p.width;
+            }
+
+            p.push();
+            p.noStroke();
+            p.fill(255, alpha);
+            p.translate(translateX, 0);
+
+            for (let j = 0; j <= p.height / circleSize; j++) {
+              p.circle(0, 0, circleSize);
+              p.translate(0, circleSize);
+            }
+
+            p.pop();
           }
-
-          p.pop();
         }
       };
 
